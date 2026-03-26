@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Filter Traffic</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html">🏠 Home</a>
+  <a href="history.html">📊 History</a>
+  <a href="manage.html">✏ Manage</a>
+  <a href="filter.html">🔍 Filter</a>
+
+  <button onclick="logout()" class="logout-btn">🚪 Logout</button>
+</nav>
+
+<div class="container">
+  <h1>🔍 Filter Records</h1>
+
+  <select id="filterLevel">
+    <option value="All">All</option>
+    <option value="Low">Low</option>
+    <option value="Medium">Medium</option>
+    <option value="High">High</option>
+  </select>
+
+  <ul id="filterList"></ul>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

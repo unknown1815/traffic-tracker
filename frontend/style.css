@@ -1,0 +1,231 @@
+/* 🌐 Open Sans Font */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* 🔝 Navbar */
+.navbar {
+  background: #020617;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar a, .navbar button {
+  color: #cbd5f5;
+  text-decoration: none;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar a:hover, .navbar button:hover {
+  color: #38bdf8;
+}
+
+/* 🚪 Logout Button */
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+  transform: translateY(-1px);
+}
+
+/* 📦 Container */
+.container {
+  max-width: 650px;
+  margin: 40px auto;
+  background: #020617;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  text-align: center;
+}
+
+/* 🧾 Headings */
+h1, h2, h3 {
+  color: #38bdf8;
+}
+
+/* 📋 Form */
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 🔽 Inputs & Select */
+input, select {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus, select:focus {
+  box-shadow: 0 0 5px #38bdf8;
+}
+
+/* 🚀 Buttons */
+button {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #38bdf8;
+  color: #020617;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #0ea5e9;
+}
+
+/* 📊 Result */
+#result {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* 📋 List */
+ul {
+  margin-top: 20px;
+  padding: 0;
+}
+
+/* 📄 List Item */
+li {
+  list-style: none;
+  background: #1e293b;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 📦 Record Info */
+.record-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  flex: 1;
+}
+
+/* 🧾 Main Info */
+.main-info {
+  font-size: 14px;
+  color: #cbd5f5;
+}
+
+/* 📊 Result Info */
+.result-info {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 🎯 Level Colors */
+.low {
+  color: #22c55e;
+}
+
+.medium {
+  color: #facc15;
+}
+
+.high {
+  color: #ef4444;
+}
+
+/* 📦 Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ✏ Edit Button */
+.edit-btn {
+  background: #22c55e;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.edit-btn:hover {
+  background: #16a34a;
+}
+
+/* ❌ Delete Button */
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* 📊 Chart */
+canvas {
+  margin-top: 30px;
+  background: #020617;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+/* 🔍 Filter */
+#filterLevel {
+  margin-top: 15px;
+  width: 100%;
+}
+
+/* 🔗 Links */
+a {
+  color: #38bdf8;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-buttons {
+    margin-top: 10px;
+  }
+}
