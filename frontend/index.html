@@ -3,62 +3,79 @@
 <head>
   <title>Traffic Predictor</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- TomTom -->
+  <link rel="stylesheet" href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps.css">
+  <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/maps/maps-web.min.js"></script>
+  <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.25.0/services/services-web.min.js"></script>
 </head>
+
 <body>
 
-<nav class="navbar">
-  <a href="index.html">🏠 Home</a>
-  <a href="history.html">📊 History</a>
-  <a href="manage.html">✏ Manage</a>
-  <a href="filter.html">🔍 Filter</a>
+<!-- 🔐 AUTH SCREEN -->
+<div id="authScreen" class="auth-container">
+  <div class="auth-card">
+    <h2 id="authTitle">Login</h2>
 
-  <button onclick="logout()" class="logout-btn">🚪 Logout</button>
-</nav>
+    <input id="authUser" placeholder="Username">
+    <input id="authPass" type="password" placeholder="Password">
 
-<div class="container">
-  <h1>🚦 Traffic Congestion Predictor</h1>
+    <button onclick="handleAuth()">Login</button>
 
-  <div class="form-box">
+    <p onclick="toggleAuth()" class="switch">
+      Don't have account? Signup
+    </p>
 
-    <label>🕒 Time</label>
-    <select id="time">
-      <option value="morning">Morning</option>
-      <option value="afternoon">Afternoon</option>
-      <option value="evening">Evening</option>
-      <option value="night">Night</option>
-    </select>
-
-    <label>📅 Day</label>
-    <select id="day">
-      <option value="monday">Monday</option>
-      <option value="tuesday">Tuesday</option>
-      <option value="wednesday">Wednesday</option>
-      <option value="thursday">Thursday</option>
-      <option value="friday">Friday</option>
-      <option value="saturday">Saturday</option>
-      <option value="sunday">Sunday</option>
-    </select>
-
-    <label>📍 Location</label>
-    <select id="location">
-      <option value="city">City</option>
-      <option value="town">Town</option>
-      <option value="village">Village</option>
-    </select>
-
-    <label>🌦 Weather</label>
-    <select id="weather">
-      <option value="clear">Clear</option>
-      <option value="rain">Rain</option>
-      <option value="fog">Fog</option>
-    </select>
-
-    <button onclick="predict()">🚀 Predict</button>
+    <p id="authMsg"></p>
   </div>
+</div>
 
-  <h2 id="result"></h2>
+<!-- 🚦 MAIN APP -->
+<div id="app" style="display:none;">
+  <div class="container">
 
+    <div class="nav">
+      <a href="#">Home</a>
+      <a href="manage.html">Manage</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
 
+    <h1>🚦 Traffic Predictor</h1>
+
+    <div class="row">
+      <select id="time">
+        <option value="morning">Morning</option>
+        <option value="afternoon">Afternoon</option>
+        <option value="evening">Evening</option>
+        <option value="night">Night</option>
+      </select>
+
+      <select id="day">
+        <option value="monday">Monday</option>
+        <option value="tuesday">Tuesday</option>
+        <option value="wednesday">Wednesday</option>
+        <option value="thursday">Thursday</option>
+        <option value="friday">Friday</option>
+        <option value="saturday">Saturday</option>
+        <option value="sunday">Sunday</option>
+      </select>
+
+      <input id="location" placeholder="City (e.g. Bangalore)">
+    </div>
+
+    <div class="row">
+      <input id="origin" placeholder="Start (e.g. Whitefield)">
+      <input id="destination" placeholder="Destination (e.g. MG Road)">
+      <button onclick="predict()">Predict</button>
+    </div>
+
+    <div id="result-box">
+      <h2 id="result"></h2>
+    </div>
+
+    <div id="map"></div>
+
+  </div>
 </div>
 
 <script src="script.js"></script>

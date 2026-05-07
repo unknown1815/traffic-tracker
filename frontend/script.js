@@ -1,284 +1,248 @@
-const API = "http://127.0.0.1:5000/api/traffic";
-const AUTH_API = "http://127.0.0.1:5000/api/auth";
-
-
 // =======================
-// 🔐 AUTH CHECK
+// 🔐 AUTH SYSTEM
 // =======================
-function checkAuth() {
-  const token = localStorage.getItem("token");
+let isLogin = true;
 
-  const isAuthPage =
-    window.location.pathname.includes("login") ||
-    window.location.pathname.includes("signup");
+function toggleAuth() {
+  isLogin = !isLogin;
 
-  if (!token && !isAuthPage) {
-    window.location.href = "login.html";
-  }
+  document.getElementById("authTitle").innerText =
+    isLogin ? "Login" : "Signup";
+
+  document.querySelector(".switch").innerText =
+    isLogin
+      ? "Don't have account? Signup"
+      : "Already have account? Login";
 }
-checkAuth();
+
+function handleAuth() {
+  const user = document.getElementById("authUser").value;
+  const pass = document.getElementById("authPass").value;
+
+  if (!user || !pass) {
+    document.getElementById("authMsg").innerText = "Fill all fields";
+    return;
+  }
+
+  // Save login state
+  localStorage.setItem("loggedIn", "true");
+
+  showApp();
+}
+
+function showApp() {
+  document.getElementById("authScreen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+
+function logout() {
+  localStorage.removeItem("loggedIn");
+
+  document.getElementById("app").style.display = "none";
+  document.getElementById("authScreen").style.display = "flex";
+}
 
 
 // =======================
-// 🔮 PREDICT
+// 🧠 AUTO DETECT TIME/DAY
+// =======================
+function autoDetect() {
+  const now = new Date();
+  const hour = now.getHours();
+
+  let timeValue = "morning";
+  if (hour >= 5 && hour < 12) timeValue = "morning";
+  else if (hour >= 12 && hour < 17) timeValue = "afternoon";
+  else if (hour >= 17 && hour < 21) timeValue = "evening";
+  else timeValue = "night";
+
+  const days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  const dayValue = days[now.getDay()];
+
+  document.getElementById("time").value = timeValue;
+  document.getElementById("day").value = dayValue;
+}
+
+
+// =======================
+// 🔮 PREDICT FUNCTION
 // =======================
 async function predict() {
   const time = document.getElementById("time").value;
   const day = document.getElementById("day").value;
-  const location = document.getElementById("location").value;
-  const weather = document.getElementById("weather").value;
+  const location = document.getElementById("location").value.trim();
+  const origin = document.getElementById("origin").value.trim();
+  const destination = document.getElementById("destination").value.trim();
 
-  const res = await fetch(API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": localStorage.getItem("token")
-    },
-    body: JSON.stringify({ time, day, location, weather })
-  });
-
-  const data = await res.json();
-
-  const resultBox = document.getElementById("result");
-  if (!resultBox) return;
-
-  resultBox.innerText = `Traffic: ${data.level} (Score: ${data.score.toFixed(2)})`;
-
-  // 🎨 Color indicator
-  if (data.level === "Low") resultBox.style.color = "green";
-  else if (data.level === "Medium") resultBox.style.color = "orange";
-  else resultBox.style.color = "red";
-
-  // ⏱ Peak detection
-  if (time === "evening" && day === "friday") {
-    resultBox.innerText += " ⚠ Peak Traffic Time!";
-  }
-
-  loadData();
-}
-
-
-// =======================
-// 📋 LOAD HOME DATA
-// =======================
-async function loadData() {
-  const list = document.getElementById("list");
-  if (!list) return;
-
-  const res = await fetch(API);
-  const data = await res.json();
-
-  list.innerHTML = "";
-
-  data.forEach(item => {
-    const li = document.createElement("li");
-
-    li.innerHTML = `
-      ${item.time} - ${item.day} (${item.location}, ${item.weather}) → ${item.level}
-      <button onclick="deleteData('${item._id}')">❌</button>
-    `;
-
-    list.appendChild(li);
-  });
-}
-
-
-// =======================
-// ❌ DELETE
-// =======================
-async function deleteData(id) {
-  await fetch(API + "/" + id, { method: "DELETE" });
-
-  loadData();
-  loadManage();
-}
-
-
-// =======================
-// ✏ EDIT (UPDATE FEATURE)
-// =======================
-async function editData(id) {
-  const time = prompt("Enter new time (morning/afternoon/evening/night):");
-  const day = prompt("Enter new day (monday-sunday):");
-  const location = prompt("Enter location (city/town/village):");
-  const weather = prompt("Enter weather (clear/rain/fog):");
-
-  if (!time || !day || !location || !weather) {
-    alert("All fields required!");
+  if (!time || !day || !location || !origin || !destination) {
+    alert("Please fill all fields!");
     return;
   }
 
-  await fetch(API + "/" + id, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ time, day, location, weather })
-  });
+  const resultBox = document.getElementById("result");
+  resultBox.innerText = "⏳ Fetching live data...";
+  resultBox.style.color = "white";
 
-  alert("Updated successfully!");
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/traffic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ time, day, location, origin, destination }),
+    });
 
-  loadManage();
-  loadData();
+    const data = await res.json();
+    console.log("✅ API RESPONSE:", data);
+
+    if (!res.ok || data.error) {
+      resultBox.innerText = "❌ " + (data.error || "Prediction failed");
+      resultBox.style.color = "red";
+      return;
+    }
+
+    const score =
+      !isNaN(Number(data.score)) ? Number(data.score).toFixed(2) : "N/A";
+
+    const trafficIndex =
+      !isNaN(Number(data.trafficIndex))
+        ? Number(data.trafficIndex).toFixed(2)
+        : "N/A";
+
+    resultBox.innerText = `Traffic: ${
+      data.level || "N/A"
+    }  |  Score: ${score}  |  Weather: ${
+      data.weather || "N/A"
+    }  |  Traffic Index: ${trafficIndex}`;
+
+    if (data.level === "Low") resultBox.style.color = "#00e676";
+    else if (data.level === "Medium") resultBox.style.color = "#ffaa00";
+    else resultBox.style.color = "#ff3333";
+
+    await showMap(origin, destination, location, data.level);
+  } catch (err) {
+    console.error("❌ FRONTEND ERROR:", err);
+    resultBox.innerText =
+      "❌ Network error — check backend server (port 5000)";
+    resultBox.style.color = "red";
+  }
 }
 
 
 // =======================
-// ✏ MANAGE PAGE
+// 📍 GEOCODE HELPER
 // =======================
-async function loadManage() {
-  const list = document.getElementById("manageList");
-  if (!list) return;
+const TOMTOM_KEY = "yrRF5NkQ9WrQiUxxSP3Ke3tWZxYDeY1j"; // 🔥 PUT YOUR REAL KEY
 
-  const res = await fetch(API);
-  const data = await res.json();
+let mapInstance = null;
 
-  list.innerHTML = "";
-
-  data.forEach(item => {
-    const li = document.createElement("li");
-
-    li.innerHTML = `
-      <div class="record-info">
-        <div class="main-info">
-          ${item.time} | ${item.day} | ${item.location} | ${item.weather}
-        </div>
-
-        <div class="result-info">
-          Score: ${item.score.toFixed(2)} → 
-          <span class="${item.level.toLowerCase()}">${item.level}</span>
-        </div>
-      </div>
-
-      <div class="action-buttons">
-        <button class="edit-btn" onclick="editData('${item._id}')">✏</button>
-        <button class="delete-btn" onclick="deleteData('${item._id}')">❌</button>
-      </div>
-    `;
-
-    list.appendChild(li);
+async function geocode(query) {
+  const res = await tt.services.fuzzySearch({
+    key: TOMTOM_KEY,
+    query: query,
   });
+
+  if (!res.results || res.results.length === 0) {
+    throw new Error(`Could not geocode: "${query}"`);
+  }
+
+  const pos = res.results[0].position;
+  return [pos.lng, pos.lat];
 }
 
 
 // =======================
-// 📊 GRAPH
+// 🗺️ SHOW MAP + ROUTE
 // =======================
-async function loadChart() {
-  const canvas = document.getElementById("trafficChart");
-  if (!canvas) return;
+async function showMap(origin, destination, city, level) {
+  if (typeof tt === "undefined" || typeof tt.services === "undefined") {
+    console.error("❌ TomTom SDK not loaded");
+    return;
+  }
 
-  const res = await fetch(API);
-  const data = await res.json();
+  let routeColor = "#00e676";
+  if (level === "Medium") routeColor = "#ffaa00";
+  if (level === "High") routeColor = "#ff3333";
 
-  const labels = data.map((_, i) => "Entry " + (i + 1));
-  const scores = data.map(d => d.score);
+  if (mapInstance) {
+    mapInstance.remove();
+    mapInstance = null;
+  }
 
-  new Chart(canvas, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Traffic Score",
-        data: scores,
-        borderWidth: 2,
-        tension: 0.3
-      }]
+  document.getElementById("map").innerHTML = "";
+
+  mapInstance = tt.map({
+    key: TOMTOM_KEY,
+    container: "map",
+    center: [77.5946, 12.9716],
+    zoom: 11,
+  });
+
+  mapInstance.on("load", async () => {
+    try {
+      const originCoords = await geocode(`${origin}, ${city}`);
+      const destinationCoords = await geocode(`${destination}, ${city}`);
+
+      const routeData = await tt.services.calculateRoute({
+        key: TOMTOM_KEY,
+        locations: [originCoords, destinationCoords],
+      });
+
+      const geojson = routeData.toGeoJson();
+
+      mapInstance.addSource("route", {
+        type: "geojson",
+        data: geojson,
+      });
+
+      mapInstance.addLayer({
+        id: "route-line",
+        type: "line",
+        source: "route",
+        paint: {
+          "line-color": routeColor,
+          "line-width": 6,
+        },
+      });
+
+      new tt.Marker().setLngLat(originCoords).addTo(mapInstance);
+      new tt.Marker({ color: "red" })
+        .setLngLat(destinationCoords)
+        .addTo(mapInstance);
+
+      const bounds = new tt.LngLatBounds();
+      geojson.features[0].geometry.coordinates.forEach((c) =>
+        bounds.extend(c)
+      );
+
+      mapInstance.fitBounds(bounds, { padding: 50 });
+    } catch (err) {
+      console.error("❌ Map error:", err.message);
     }
   });
 }
 
 
 // =======================
-// 🔍 FILTER
+// 🚀 INIT (FINAL FIX)
 // =======================
-async function filterData() {
-  const dropdown = document.getElementById("filterLevel");
-  const list = document.getElementById("filterList");
+window.onload = () => {
+  // Auth check
+  const isLoggedIn = localStorage.getItem("loggedIn");
 
-  if (!dropdown || !list) return;
-
-  const level = dropdown.value;
-
-  const res = await fetch(API);
-  const data = await res.json();
-
-  const filtered = level === "All"
-    ? data
-    : data.filter(item => item.level === level);
-
-  list.innerHTML = "";
-
-  filtered.forEach(item => {
-    const li = document.createElement("li");
-    li.innerText = `${item.time} - ${item.day} → ${item.level}`;
-    list.appendChild(li);
-  });
-}
-
-
-// =======================
-// 🔐 SIGNUP
-// =======================
-async function signup() {
-  const username = document.getElementById("username").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  await fetch(AUTH_API + "/signup", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ username, email, password })
-  });
-
-  alert("Signup successful!");
-  window.location.href = "login.html";
-}
-
-
-// =======================
-// 🔐 LOGIN
-// =======================
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const res = await fetch(AUTH_API + "/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await res.json();
-
-  if (data.token) {
-    localStorage.setItem("token", data.token);
-    alert("Login successful!");
-    window.location.href = "index.html";
+  if (isLoggedIn === "true") {
+    showApp();
   } else {
-    alert(data.error || "Login failed");
+    document.getElementById("authScreen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
   }
-}
 
-
-// =======================
-// 🚪 LOGOUT
-// =======================
-function logout() {
-  localStorage.removeItem("token");
-  alert("Logged out");
-  window.location.href = "login.html";
-}
-
-
-// =======================
-// 🚀 AUTO LOAD
-// =======================
-loadData();
-loadManage();
-loadChart();
-
-const filterDropdown = document.getElementById("filterLevel");
-if (filterDropdown) {
-  filterDropdown.addEventListener("change", filterData);
-}
+  // Auto detect time/day
+  autoDetect();
+};
