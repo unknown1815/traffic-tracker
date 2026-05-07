@@ -210,18 +210,11 @@ Traffic route colors:
 
 # 📸 Screenshots
 
-Add screenshots here:
+ ![App Screenshot](images/image.png)
 
-```text id="9j4v2u"
-screenshots/
-```
 
-Recommended:
 
-* Login page
-* Prediction page
-* Map route visualization
-* Manage records page
+
 
 ---
 
